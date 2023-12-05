@@ -1,0 +1,28 @@
+.header-wrapper {
+  background-color: #101010;
+  height: 50px;
+  color: #fff;
+}
+
+.header-mid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 50px;
+}
+.header-left-aligned {
+  height: 50px;
+  line-height: 50px;
+  text-align: left;
+  color: #9d9d9d;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.header-right-aligned {
+  height: 50px;
+  line-height: 50px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+}
