@@ -1,18 +1,33 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   HomeOutlined,
   ArrowLeftOutlined,
   EyeInvisibleOutlined,
   CloudUploadOutlined,
-  FolderAddOutlined
+  FolderAddOutlined,
+  InboxOutlined
 } from '@ant-design/icons'
-import { Breadcrumb, Button, Layout, Menu, theme, Row, Col } from 'antd'
+import { Breadcrumb, Button, Layout, Menu, theme, Row, Col, Modal, Upload, Input } from 'antd'
 import NavHeader from '@/components/NavHeader'
+import ContentTable from '@/components/ContentTable'
 import styles from './index.module.less'
+import api from '@/api'
+import { FileDescriptor } from '@/types/api'
 
-const { Header, Content, Footer } = Layout
+const { Content, Footer } = Layout
 
 const App: React.FC = () => {
+  const { Dragger } = Upload
+  const [files, setFiles] = useState<FileDescriptor[]>()
+
+  useEffect(() => {
+    getFileList()
+  }, [])
+  const getFileList = async () => {
+    const data = await api.getFiles()
+    setFiles(data)
+  }
+
   const {
     token: { colorBgContainer }
   } = theme.useToken()
@@ -22,7 +37,7 @@ const App: React.FC = () => {
       <NavHeader />
 
       <Row style={{ backgroundColor: '#fff' }}>
-        <Col span={4}>col-8</Col>
+        <Col span={4}></Col>
         <Col span={16}>
           <Content className='site-layout'>
             {/* 面包屑 */}
@@ -35,19 +50,61 @@ const App: React.FC = () => {
             </Breadcrumb>
 
             {/* 操作按钮 */}
-            <div>
-              <Button icon={<ArrowLeftOutlined />}>Back</Button>
-              <Button icon={<EyeInvisibleOutlined />}>Hidden</Button>
-              <Button icon={<CloudUploadOutlined />}>Upload</Button>
-              <Button icon={<FolderAddOutlined />}>New Folder</Button>
+            <div className={styles.baropMiddleWrapper}>
+              <Button className={styles.baropAntBtn} icon={<ArrowLeftOutlined />}>
+                Back
+              </Button>
+              <Button className={styles.baropAntBtn} icon={<EyeInvisibleOutlined />}>
+                Hidden
+              </Button>
+              <Button className={styles.baropAntBtn} icon={<CloudUploadOutlined />}>
+                Upload
+              </Button>
+              <Button className={styles.baropAntBtn} icon={<FolderAddOutlined />}>
+                New Folder
+              </Button>
             </div>
 
-            <div style={{ padding: 24, minHeight: 380, background: colorBgContainer }}>Content</div>
+            {/* <div style={{ padding: 24, minHeight: 380, background: colorBgContainer }}>
+            </div> */}
+            <ContentTable />
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Footer>
+          {/* <Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Footer> */}
         </Col>
-        <Col span={4}>col-8</Col>
+        <Col span={4}></Col>
       </Row>
+
+      <Modal
+        title='资源信息'
+        // open={this.state.isOpenInfoModal}
+        // onOk={this.handleOpenInfoOk}
+        // onCancel={this.handleOpenInfoCancel}
+        width={700}
+      >
+        <pre></pre>
+      </Modal>
+
+      <Modal title='New Folder'>
+        <div className='newFolderWrapper'>
+          <p className='newFolderDesc'>current path: </p>
+          <p className='newFolderDesc'>please enter the new directory name</p>
+          <Input placeholder='folder name' />
+        </div>
+      </Modal>
+
+      <Modal title='Upload'>
+        <div className='uploadWrapper'>
+          <Dragger>
+            <p className='ant-upload-drag-icon'>
+              <InboxOutlined />
+            </p>
+            <p className='ant-upload-text'>Click or drag file to this area to upload</p>
+            <p className='ant-upload-hint'>
+              Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files
+            </p>
+          </Dragger>
+        </div>
+      </Modal>
     </Layout>
   )
 }
