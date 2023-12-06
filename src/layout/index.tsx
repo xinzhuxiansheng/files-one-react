@@ -12,19 +12,26 @@ import NavHeader from '@/components/NavHeader'
 import ContentTable from '@/components/ContentTable'
 import styles from './index.module.less'
 import api from '@/api'
-import { FileDescriptor } from '@/types/api'
+import { FileDescriptor, ListParams } from '@/types/api'
 
 const { Content, Footer } = Layout
 
 const App: React.FC = () => {
   const { Dragger } = Upload
+
+  const [searchParams, setSearchParams] = useState<ListParams>({
+    path: '/',
+    keyword: '',
+    isHidden: true
+  })
   const [files, setFiles] = useState<FileDescriptor[]>()
 
   useEffect(() => {
     getFileList()
   }, [])
+
   const getFileList = async () => {
-    const data = await api.getFiles()
+    const data = await api.getFiles(searchParams)
     setFiles(data)
   }
 
