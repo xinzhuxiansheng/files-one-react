@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { RouterProvider, BrowserRouter } from 'react-router-dom'
 import { ConfigProvider, App as AntdApp } from 'antd'
 import Router from './router'
+import AntdGlobal from './utils/AntdGlobal'
 import './App.less'
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     // 组件路由
     <ConfigProvider>
       <AntdApp>
+        <AntdGlobal />
         <BrowserRouter>
           <Router />
         </BrowserRouter>

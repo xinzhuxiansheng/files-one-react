@@ -8,7 +8,7 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 8080,
     proxy: {
-      '/api': 'http://react.yzhou.com:5000' // 此处一定要配置域名，不然无法访问
+      '/api': 'http://localhost:8082'
     }
   },
   resolve: {

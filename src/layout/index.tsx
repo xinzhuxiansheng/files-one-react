@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   HomeOutlined,
   ArrowLeftOutlined,
@@ -11,28 +11,17 @@ import { Breadcrumb, Button, Layout, Menu, theme, Row, Col, Modal, Upload, Input
 import NavHeader from '@/components/NavHeader'
 import ContentTable from '@/components/ContentTable'
 import styles from './index.module.less'
-import api from '@/api'
-import { FileDescriptor, ListParams } from '@/types/api'
+import { useStore } from '@/store'
 
 const { Content, Footer } = Layout
 
 const App: React.FC = () => {
   const { Dragger } = Upload
+  const state = useStore()
 
-  const [searchParams, setSearchParams] = useState<ListParams>({
-    path: '/',
-    keyword: '',
-    isHidden: true
-  })
-  const [files, setFiles] = useState<FileDescriptor[]>()
-
-  useEffect(() => {
-    getFileList()
-  }, [])
-
-  const getFileList = async () => {
-    const data = await api.getFiles(searchParams)
-    setFiles(data)
+  const handleIsHidden = () => {
+    var isHidden = state.isHidden
+    state.updateIsHidden(!isHidden)
   }
 
   const {
@@ -61,7 +50,7 @@ const App: React.FC = () => {
               <Button className={styles.baropAntBtn} icon={<ArrowLeftOutlined />}>
                 Back
               </Button>
-              <Button className={styles.baropAntBtn} icon={<EyeInvisibleOutlined />}>
+              <Button className={styles.baropAntBtn} icon={<EyeInvisibleOutlined />} onClick={handleIsHidden}>
                 Hidden
               </Button>
               <Button className={styles.baropAntBtn} icon={<CloudUploadOutlined />}>
@@ -80,16 +69,6 @@ const App: React.FC = () => {
         </Col>
         <Col span={4}></Col>
       </Row>
-
-      <Modal
-        title='资源信息'
-        // open={this.state.isOpenInfoModal}
-        // onOk={this.handleOpenInfoOk}
-        // onCancel={this.handleOpenInfoCancel}
-        width={700}
-      >
-        <pre></pre>
-      </Modal>
 
       <Modal title='New Folder'>
         <div className='newFolderWrapper'>

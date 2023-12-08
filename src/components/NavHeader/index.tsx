@@ -1,11 +1,16 @@
-import { AudioOutlined } from '@ant-design/icons'
 import { Row, Col, Input, Space } from 'antd'
 import './index.css'
 import { SearchProps } from 'antd/es/input/Search'
+import { useStore } from '@/store'
 export default function NavHeader() {
   const { Search } = Input
 
-  const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value)
+  const state = useStore()
+
+  // const onSearch: SearchProps['onSearch'] = (value, _e, info) => console.log(info?.source, value)
+  const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
+    state.updateKeyword(value)
+  }
 
   return (
     <div className='header-wrapper'>

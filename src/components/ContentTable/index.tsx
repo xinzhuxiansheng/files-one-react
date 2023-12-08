@@ -18,22 +18,29 @@ import { Space, Table, Button, Modal } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { FileDescriptor, ListParams } from '@/types/api'
 import api from '@/api'
+import { useStore } from '@/store/index'
+import styles from './index.module.less'
 
 export default function ContentTable() {
   const { confirm } = Modal
+  const [isOpenInfoModal, setIsOpenInfoModal] = useState(false)
+  const [resourceInfo, setResourceInfo] = useState('')
+  const path = useStore(state => state.path)
+  const keyword = useStore(state => state.keyword)
+  const isHidden = useStore(state => state.isHidden)
 
-  const [searchParams, setSearchParams] = useState<ListParams>({
-    path: '/',
-    keyword: '',
-    isHidden: true
-  })
   const [files, setFiles] = useState<FileDescriptor[]>()
 
   useEffect(() => {
     getFileList()
-  }, [])
+  }, [path, keyword, isHidden])
 
   const getFileList = async () => {
+    const searchParams: ListParams = {
+      path: path,
+      keyword: keyword,
+      isHidden: isHidden
+    }
     const data = await api.getFiles(searchParams)
     setFiles(data)
   }
@@ -55,6 +62,17 @@ export default function ContentTable() {
     })
   }
 
+  const alertInfo = (record: FileDescriptor) => {
+    setResourceInfo(JSON.stringify(record, null, 2))
+    setIsOpenInfoModal(true)
+  }
+  const handleOpenInfoOk = () => {
+    setIsOpenInfoModal(false)
+  }
+  const handleOpenInfoCancel = () => {
+    setIsOpenInfoModal(false)
+  }
+
   const columns: ColumnsType<FileDescriptor> = [
     {
       title: 'Name',
@@ -65,7 +83,7 @@ export default function ContentTable() {
           //是跳转
           return (
             <span>
-              <FolderOpenOutlined className='tableFirstC' />
+              <FolderOpenOutlined className={styles.tableFirstC} />
               <a onClick={() => this.goCurrentPath(record)}>{record.name}</a>
             </span>
           )
@@ -75,56 +93,56 @@ export default function ContentTable() {
             case 'image':
               return (
                 <span>
-                  <FileImageOutlined className='tableFirstC' />
+                  <FileImageOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'pdf':
               return (
                 <span>
-                  <FilePdfOutlined className='tableFirstC' />
+                  <FilePdfOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'word':
               return (
                 <span>
-                  <FileWordOutlined className='tableFirstC' />
+                  <FileWordOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'excel':
               return (
                 <span>
-                  <FileExcelOutlined className='tableFirstC' />
+                  <FileExcelOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'ppt':
               return (
                 <span>
-                  <FilePptOutlined className='tableFirstC' />
+                  <FilePptOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'md':
               return (
                 <span>
-                  <FileMarkdownOutlined className='tableFirstC' />
+                  <FileMarkdownOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'yasuobao':
               return (
                 <span>
-                  <FileZipOutlined className='tableFirstC' />
+                  <FileZipOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
             case 'txt':
               return (
                 <span>
-                  <FileTextOutlined className='tableFirstC' />
+                  <FileTextOutlined className={styles.tableFirstC} />
                   <a className='tableFirstCLink'>{record.name}</a>
                 </span>
               )
@@ -159,7 +177,7 @@ export default function ContentTable() {
           >
             Download
           </Button>
-          <Button type='primary' icon={<InfoOutlined />} size='small' />
+          <Button type='primary' onClick={() => alertInfo(record)} icon={<InfoOutlined />} size='small' />
 
           {/*删除*/}
           <Button danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record)} size='small' />
@@ -168,45 +186,19 @@ export default function ContentTable() {
     }
   ]
 
-  const data: FileDescriptor[] = [
-    {
-      id: 0,
-      name: 'flink_checkpoint',
-      fType: 'folder',
-      fSize: 128,
-      fSizeDesc: '128.0 B',
-      internalPath: '/Users/a/TMP/flink_checkpoint',
-      isHidden: false,
-      modificationTime: 1690969220505,
-      modificationTimeDesc: '2023-08-02 17:40:20'
-    },
-    {
-      id: 1,
-      name: 'example_file',
-      fType: 'image',
-      fSize: 1024,
-      fSizeDesc: '1.0 KB',
-      internalPath: '/Users/a/TMP/example_file.txt',
-      isHidden: false,
-      modificationTime: 1690969330600,
-      modificationTimeDesc: '2023-08-02 17:42:10'
-    },
-    {
-      id: 2,
-      name: 'hidden_folder',
-      fType: 'folder',
-      fSize: 2048,
-      fSizeDesc: '2.0 KB',
-      internalPath: '/Users/a/TMP/hidden_folder',
-      isHidden: true,
-      modificationTime: 1690969440700,
-      modificationTimeDesc: '2023-08-02 17:44:00'
-    }
-  ]
-
   return (
     <div>
-      <Table pagination={false} columns={columns} dataSource={data} />
+      <Table rowKey='id' pagination={false} columns={columns} dataSource={files} />
+
+      <Modal
+        title='资源信息'
+        open={isOpenInfoModal}
+        onOk={handleOpenInfoOk}
+        onCancel={handleOpenInfoCancel}
+        width={700}
+      >
+        <pre>{resourceInfo}</pre>
+      </Modal>
     </div>
   )
 }
