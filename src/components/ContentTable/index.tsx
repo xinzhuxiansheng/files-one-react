@@ -13,7 +13,7 @@ import {
   FileZipOutlined,
   ExclamationCircleFilled
 } from '@ant-design/icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 import { Space, Table, Button, Modal } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { FileDescriptor, ListParams } from '@/types/api'
@@ -21,15 +21,21 @@ import api from '@/api'
 import { useStore } from '@/store/index'
 import styles from './index.module.less'
 
-export default function ContentTable() {
+const ContentTable = forwardRef((props, ref) => {
   const { confirm } = Modal
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false)
   const [resourceInfo, setResourceInfo] = useState('')
   const path = useStore(state => state.path)
   const keyword = useStore(state => state.keyword)
   const isHidden = useStore(state => state.isHidden)
-
   const [files, setFiles] = useState<FileDescriptor[]>()
+
+  //暴露给父组件的方法以及数据
+  useImperativeHandle(ref, () => ({
+    onUpdateList() {
+      getFileList()
+    }
+  }))
 
   useEffect(() => {
     getFileList()
@@ -201,4 +207,6 @@ export default function ContentTable() {
       </Modal>
     </div>
   )
-}
+})
+
+export default ContentTable

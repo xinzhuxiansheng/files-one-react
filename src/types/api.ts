@@ -32,3 +32,8 @@ export interface ListParams {
   keyword: string
   isHidden: boolean
 }
+
+export interface CreateFolderParams {
+  path: string
+  name: string
+}

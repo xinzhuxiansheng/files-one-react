@@ -8,7 +8,7 @@ export const useStore = create<{
   updateKeyword: (keyword: string) => void
   updateIsHidden: (isHidden: boolean) => void
 }>(set => ({
-  path: '',
+  path: '/',
   keyword: '',
   isHidden: true,
   // 更新 path
