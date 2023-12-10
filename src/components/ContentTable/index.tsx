@@ -25,9 +25,10 @@ const ContentTable = forwardRef((props, ref) => {
   const { confirm } = Modal
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false)
   const [resourceInfo, setResourceInfo] = useState('')
-  const path = useStore(state => state.path)
-  const keyword = useStore(state => state.keyword)
-  const isHidden = useStore(state => state.isHidden)
+  const state = useStore()
+  // const path = useStore(state => state.path)
+  // const keyword = useStore(state => state.keyword)
+  // const isHidden = useStore(state => state.isHidden)
   const [files, setFiles] = useState<FileDescriptor[]>()
 
   //暴露给父组件的方法以及数据
@@ -39,16 +40,29 @@ const ContentTable = forwardRef((props, ref) => {
 
   useEffect(() => {
     getFileList()
-  }, [path, keyword, isHidden])
+  }, [state.path, state.keyword, state.isHidden])
 
   const getFileList = async () => {
     const searchParams: ListParams = {
-      path: path,
-      keyword: keyword,
-      isHidden: isHidden
+      path: state.path,
+      keyword: state.keyword,
+      isHidden: state.isHidden
     }
     const data = await api.getFiles(searchParams)
     setFiles(data)
+  }
+
+  const goCurrentPath = (record: FileDescriptor) => {
+    // let tmpPath = this.state.currentPath
+    // this.setState({
+    //   currentPath: tmpPath + record.name
+    // }, this.updateFileList)
+    // this.props.updateCurrentPath(tmpPath + record.name)
+    var path = state.path
+    if (path === '' || path === '/') {
+      path = '/'
+    }
+    state.updatePath(path === '/' ? path + record.name : path + '/' + record.name)
   }
 
   const showDeleteConfirm = record => {
@@ -90,7 +104,7 @@ const ContentTable = forwardRef((props, ref) => {
           return (
             <span>
               <FolderOpenOutlined className={styles.tableFirstC} />
-              <a onClick={() => this.goCurrentPath(record)}>{record.name}</a>
+              <a onClick={() => goCurrentPath(record)}>{record.name}</a>
             </span>
           )
         } else {

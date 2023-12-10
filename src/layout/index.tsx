@@ -1,4 +1,4 @@
-import React, { useState, useRef, MutableRefObject } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   HomeOutlined,
   ArrowLeftOutlined,
@@ -7,22 +7,32 @@ import {
   FolderAddOutlined,
   InboxOutlined
 } from '@ant-design/icons'
-import { Breadcrumb, Button, Layout, Menu, theme, Row, Col, Modal, Upload, Input } from 'antd'
+import { Breadcrumb, Button, Layout, theme, Row, Col, Modal, Upload, Input } from 'antd'
 import NavHeader from '@/components/NavHeader'
 import ContentTable from '@/components/ContentTable'
 import styles from './index.module.less'
 import { useStore } from '@/store'
 import api from '@/api'
 import { CreateFolderParams } from '@/types/api'
+import { message } from '@/utils/AntdGlobal'
+import type { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload/interface'
 
 const { Content } = Layout
 
 const App: React.FC = () => {
-  const { Dragger } = Upload
+  // const { Dragger } = Upload
   const state = useStore()
   const tableRef = useRef<any>(null)
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
+  const [breadPaths, setBreadPaths] = useState<string[]>([])
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { Dragger } = Upload
+
+  useEffect(() => {
+    splitBread()
+  }, [state.path])
 
   // New Folder
   const showNewFolderModal = () => {
@@ -51,6 +61,69 @@ const App: React.FC = () => {
     setNewFolderName(e.target.value)
   }
 
+  const goIndex = () => {
+    state.updatePath('/')
+  }
+
+  const splitBread = () => {
+    // 使用 split 方法按 '/' 分割路径
+    const parts = state.path.split('/')
+    // 使用 filter 方法排除掉等于 '/' 的部分
+    const filteredParts = parts.filter(part => part !== '/' && part !== '')
+    setBreadPaths(filteredParts)
+  }
+  const handleBack = () => {
+    var path = state.path
+    const parts = path.split('/').filter(part => part !== '/' && part !== '')
+    parts.pop() // 移除数组的最后一个元素
+    state.updatePath('/' + parts.join('/')) // 将数组重新组合成一个字符串
+  }
+
+  const showUploadModal = () => {
+    setIsUploadModalOpen(true)
+  }
+  const handleUploadOk = () => {
+    setIsUploadModalOpen(false)
+  }
+  const handleUploadCancel = () => {
+    setIsUploadModalOpen(false)
+  }
+
+  const props: UploadProps = {
+    name: 'file',
+    multiple: true,
+    action: '/api/upload',
+    data: {
+      path: state.path
+    },
+    maxCount: 1,
+    onChange(info) {
+      const { status } = info.file
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList)
+      }
+      if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`)
+      } else if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+    beforeUpload(file: RcFile) {
+      // const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+      // if (!isJpgOrPng) {
+      //   message.error('只能上传 png 或 jpeg 格式的图片!')
+      // }
+      // const isLt2M = file.size / 1024 / 1024 < 0.5
+      // if (!isLt2M) {
+      //   message.error('图片不能超过500K!')
+      // }
+      return true
+    },
+    onDrop(e) {
+      console.log('Dropped files', e.dataTransfer.files)
+    }
+  }
+
   const {
     token: { colorBgContainer }
   } = theme.useToken()
@@ -65,22 +138,25 @@ const App: React.FC = () => {
           <Content className='site-layout'>
             {/* 面包屑 */}
             <Breadcrumb className={styles.breadWrapper} style={{ margin: '16px 0' }}>
-              <Breadcrumb.Item>
+              <Breadcrumb.Item onClick={goIndex}>
                 <HomeOutlined />
               </Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
+              {/* <Breadcrumb.Item>List</Breadcrumb.Item>
+              <Breadcrumb.Item>App</Breadcrumb.Item> */}
+              {breadPaths.map((part, index) => (
+                <Breadcrumb.Item key={index}>{part}</Breadcrumb.Item>
+              ))}
             </Breadcrumb>
 
             {/* 操作按钮 */}
             <div className={styles.baropMiddleWrapper}>
-              <Button className={styles.baropAntBtn} icon={<ArrowLeftOutlined />}>
+              <Button className={styles.baropAntBtn} icon={<ArrowLeftOutlined />} onClick={handleBack}>
                 Back
               </Button>
               <Button className={styles.baropAntBtn} icon={<EyeInvisibleOutlined />} onClick={handleIsHidden}>
                 Hidden
               </Button>
-              <Button className={styles.baropAntBtn} icon={<CloudUploadOutlined />}>
+              <Button className={styles.baropAntBtn} icon={<CloudUploadOutlined />} onClick={showUploadModal}>
                 Upload
               </Button>
               <Button className={styles.baropAntBtn} icon={<FolderAddOutlined />} onClick={showNewFolderModal}>
@@ -113,9 +189,9 @@ const App: React.FC = () => {
         </div>
       </Modal>
 
-      <Modal title='Upload'>
+      <Modal title='Upload' open={isUploadModalOpen} onOk={handleUploadOk} onCancel={handleUploadCancel}>
         <div className='uploadWrapper'>
-          <Dragger>
+          <Dragger {...props}>
             <p className='ant-upload-drag-icon'>
               <InboxOutlined />
             </p>
