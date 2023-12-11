@@ -15,5 +15,8 @@ export default {
   },
   isDirectory(name: string) {
     return request.get('/isDirectory', { name: name }, { showLoading: false })
+  },
+  checkDirectory(path: string) {
+    return request.get<string>('/checkDirectory', { path: path }, { showLoading: false })
   }
 }

@@ -5,7 +5,8 @@ import {
   EyeInvisibleOutlined,
   CloudUploadOutlined,
   FolderAddOutlined,
-  InboxOutlined
+  InboxOutlined,
+  FolderViewOutlined
 } from '@ant-design/icons'
 import { Breadcrumb, Button, Layout, theme, Row, Col, Modal, Upload, Input } from 'antd'
 import NavHeader from '@/components/NavHeader'
@@ -16,7 +17,6 @@ import api from '@/api'
 import { CreateFolderParams } from '@/types/api'
 import { message } from '@/utils/AntdGlobal'
 import type { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload/interface'
-import useFileDownloader from '@/hook/fileDownload'
 
 const { Content } = Layout
 
@@ -25,6 +25,8 @@ const App: React.FC = () => {
   const state = useStore()
   const tableRef = useRef<any>(null)
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false)
+  const [goPathModalOpen, setGoPathModalOpen] = useState(false)
+  const [goPath, setGoPath] = useState('')
   const [newFolderName, setNewFolderName] = useState('')
   const [breadPaths, setBreadPaths] = useState<string[]>([])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -88,6 +90,22 @@ const App: React.FC = () => {
   }
   const handleUploadCancel = () => {
     setIsUploadModalOpen(false)
+  }
+
+  // go to path
+  const showGoPathModal = () => {
+    setGoPathModalOpen(true)
+  }
+  const handleGoPathOk = async () => {
+    const data = await api.checkDirectory(goPath)
+    state.updatePath(data)
+    setGoPathModalOpen(false)
+  }
+  const handleGoPathCancel = () => {
+    setGoPathModalOpen(false)
+  }
+  const handleGoPathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGoPath(e.target.value)
   }
 
   const props: UploadProps = {
@@ -163,6 +181,9 @@ const App: React.FC = () => {
               <Button className={styles.baropAntBtn} icon={<FolderAddOutlined />} onClick={showNewFolderModal}>
                 New Folder
               </Button>
+              <Button className={styles.baropAntBtn} icon={<FolderViewOutlined />} onClick={showGoPathModal}>
+                Go To Path
+              </Button>
             </div>
 
             {/* <div style={{ padding: 24, minHeight: 380, background: colorBgContainer }}>
@@ -187,6 +208,13 @@ const App: React.FC = () => {
           <p className='newFolderDesc'>current path: &nbsp;{state.path}</p>
           <p className='newFolderDesc'>please enter the new directory name</p>
           <Input placeholder='folder name' value={newFolderName} onChange={handleNewFolderNameChange} />
+        </div>
+      </Modal>
+
+      <Modal title='Go To Path' open={goPathModalOpen} onOk={handleGoPathOk} onCancel={handleGoPathCancel}>
+        <div className='newFolderWrapper'>
+          <p className='newFolderDesc'>please enter 'Go To Path'</p>
+          <Input placeholder='go to path' value={goPath} onChange={handleGoPathChange} />
         </div>
       </Modal>
 

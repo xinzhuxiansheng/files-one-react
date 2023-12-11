@@ -55,11 +55,6 @@ const ContentTable = forwardRef((props, ref) => {
   }
 
   const goCurrentPath = (record: FileDescriptor) => {
-    // let tmpPath = this.state.currentPath
-    // this.setState({
-    //   currentPath: tmpPath + record.name
-    // }, this.updateFileList)
-    // this.props.updateCurrentPath(tmpPath + record.name)
     var path = state.path
     if (path === '' || path === '/') {
       path = '/'
