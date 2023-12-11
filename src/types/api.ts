@@ -37,3 +37,8 @@ export interface CreateFolderParams {
   path: string
   name: string
 }
+
+export interface DeleteResourceParams {
+  resourceName: string
+  path: string
+}

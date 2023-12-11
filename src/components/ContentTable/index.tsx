@@ -13,13 +13,14 @@ import {
   FileZipOutlined,
   ExclamationCircleFilled
 } from '@ant-design/icons'
-import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react'
-import { Space, Table, Button, Modal } from 'antd'
+import React, { useEffect, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
+import { Space, Table, Button, Modal, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { FileDescriptor, ListParams } from '@/types/api'
+import { DeleteResourceParams, FileDescriptor, ListParams } from '@/types/api'
 import api from '@/api'
 import { useStore } from '@/store/index'
 import styles from './index.module.less'
+import useFileDownloader from '@/hook/fileDownload'
 
 const ContentTable = forwardRef((props, ref) => {
   const { confirm } = Modal
@@ -30,6 +31,7 @@ const ContentTable = forwardRef((props, ref) => {
   // const keyword = useStore(state => state.keyword)
   // const isHidden = useStore(state => state.isHidden)
   const [files, setFiles] = useState<FileDescriptor[]>()
+  const downloadFile = useFileDownloader()
 
   //暴露给父组件的方法以及数据
   useImperativeHandle(ref, () => ({
@@ -65,7 +67,7 @@ const ContentTable = forwardRef((props, ref) => {
     state.updatePath(path === '/' ? path + record.name : path + '/' + record.name)
   }
 
-  const showDeleteConfirm = record => {
+  const showDeleteConfirm = (record: FileDescriptor) => {
     confirm({
       title: '你是否要删除该目录或者文件?',
       icon: <ExclamationCircleFilled />,
@@ -75,11 +77,21 @@ const ContentTable = forwardRef((props, ref) => {
       cancelText: 'No',
       onOk() {
         console.log('OK')
+        deleteResource(record)
       },
       onCancel() {
         console.log('Cancel')
       }
     })
+  }
+
+  const deleteResource = async (record: FileDescriptor) => {
+    const createFolderParams: DeleteResourceParams = {
+      path: state.path,
+      resourceName: record.name
+    }
+    var data = await api.deleteResource(createFolderParams)
+    getFileList()
   }
 
   const alertInfo = (record: FileDescriptor) => {
@@ -91,6 +103,14 @@ const ContentTable = forwardRef((props, ref) => {
   }
   const handleOpenInfoCancel = () => {
     setIsOpenInfoModal(false)
+  }
+  const downloadResource = async (record: FileDescriptor) => {
+    var isDic = await api.isDirectory(record.name)
+    if (isDic) {
+      message.error('暂不支持文件夹下载')
+      return
+    }
+    var data = await api.downloadResource(record.name)
   }
 
   const columns: ColumnsType<FileDescriptor> = [
@@ -191,7 +211,7 @@ const ContentTable = forwardRef((props, ref) => {
           <Button
             type='primary'
             // loading={this.state.downloadLoading[record.id]}
-            // onClick={() => this.downloadResource(record)}
+            onClick={() => downloadResource(record)}
             icon={<DownloadOutlined />}
             size='small'
           >

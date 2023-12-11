@@ -38,6 +38,10 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
   response => {
+    if (response.headers['content-type'] === 'application/octet-stream') {
+      hideLoading()
+      return response // 对于文件下载，直接返回原始响应
+    }
     const data: Result = response.data
     hideLoading()
     if (data.code != 200) {
@@ -67,5 +71,8 @@ export default {
   },
   post<T>(url: string, params: object, options: IConfig = { showLoading: true, showError: true }): Promise<T> {
     return instance.post(url, params, options)
+  },
+  download<T>(url: string, params?: object, options: IConfig = { showLoading: true, showError: true }): Promise<T> {
+    return instance.get(url, { params, ...options, responseType: 'blob' })
   }
 }

@@ -16,6 +16,7 @@ import api from '@/api'
 import { CreateFolderParams } from '@/types/api'
 import { message } from '@/utils/AntdGlobal'
 import type { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload/interface'
+import useFileDownloader from '@/hook/fileDownload'
 
 const { Content } = Layout
 
