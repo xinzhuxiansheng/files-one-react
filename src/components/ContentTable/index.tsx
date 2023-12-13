@@ -21,6 +21,7 @@ import api from '@/api'
 import { useStore } from '@/store/index'
 import styles from './index.module.less'
 import useFileDownloader from '@/hook/fileDownload'
+import downloadFiles from '@/utils/downloadFiles'
 
 const ContentTable = forwardRef((props, ref) => {
   const { confirm } = Modal
@@ -106,6 +107,8 @@ const ContentTable = forwardRef((props, ref) => {
       return
     }
     var data = await api.downloadResource(record.name)
+
+    downloadFiles(data, record.name)
   }
 
   const columns: ColumnsType<FileDescriptor> = [
